@@ -1,5 +1,4 @@
-# avg_path_length.jl
-
+# Forward edge ratio computatoin doesn't take much time, so we do not optimize / multi-thread.
 using Graphs, Graphs.SimpleGraphs
 using SparseArrays, LinearAlgebra
 using SimpleTraits, Statistics
@@ -19,7 +18,6 @@ function ber_directed_divisor_graph(n::Int64, p::Float64)
     end
     return g
 end
-
 
 function bfs_distances(g::DiGraph, src::Int)
     n = nv(g)
@@ -42,13 +40,13 @@ function bfs_distances(g::DiGraph, src::Int)
     return dist
 end
 
-function avg_path_length(subg::DiGraph; samples::Int=100)
+function avg_path_length(subg::DiGraph; samples::Int)
     n_sub = nv(subg)
     dists = Float64[]
     for _ in 1:samples
         u, v = rand(1:n_sub), rand(1:n_sub)
-        dist = bfs_distances(subg, u)    # <-- dist is a Vector
-        push!(dists, dist[v])            # <-- index it directly
+        dist = bfs_distances(subg, u) # dist is a Vector
+        push!(dists, dist[v])         # index it directly
     end
     return isempty(dists) ? 0.0 : mean(dists)
 end
@@ -60,7 +58,6 @@ n_replicate = 5
 
 results_file = "3_2to$(Int(log2(n)))_avg_path_length.csv"
 
-# Write header only once at the beginning
 if !isfile(results_file)
     CSV.write(results_file, DataFrame(n=Int[], p=Float64[], rep=Int[], apl=Float64[]))
 end
@@ -74,19 +71,18 @@ end
         for rep in 1:n_replicate
             g = ber_directed_divisor_graph(n, p)
 
-            # find largest SCC
+            # Largest SCC
             scc_list   = strongly_connected_components_tarjan(g)
             comp_sizes = length.(scc_list)
             verts      = scc_list[argmax(comp_sizes)]
             subg, _    = induced_subgraph(g, verts)
 
-            # compute average path-length
-            apl = avg_path_length(subg; samples=1000)
+            # average path-length with 1000 samples
+            apl = avg_path_length(subg; samples=1000) # Edit sample size if needed
 
             push!(temp_results, (n, p, rep, apl))
         end
         
-        # Write results for this p
         CSV.write(results_file, temp_results; append=true)
 
         @info "Completed (n,p) = ($n, $p) at $(now())"

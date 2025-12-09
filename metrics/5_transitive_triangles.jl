@@ -1,5 +1,3 @@
-# transitive_triangles.jl
-
 using Graphs, Graphs.SimpleGraphs
 using SparseArrays, LinearAlgebra
 using SimpleTraits, Statistics
@@ -34,30 +32,6 @@ if !isfile(results_file)
 end
 
 # 2.85 to 3 sec when n=2^15, ps=0.1,0.1,0.5, n_replicate=1
-#=
-@time begin
-    for p in ps
-        for rep in 1:n_replicate
-            g = ber_directed_divisibility_graph(n, p)
-            # find largest SCC
-            scc_list   = strongly_connected_components_tarjan(g)
-            comp_sizes = length.(scc_list)
-            verts      = scc_list[argmax(comp_sizes)]
-            subg, _    = induced_subgraph(g, verts)
-
-            # compute transitive triangles
-            tt = sum(triangles(subg))
-
-            push!(results, (n, p, rep, tt))
-        end
-        # Write results for this p
-        CSV.write(results_file, results; append=true)
-
-        @info "Completed (n,p) = ($n, $p) at $(now())"
-    end
-end
-=#
-
 
 @time begin
     for p in ps
@@ -80,12 +54,3 @@ end
         @info "Completed (n,p) = ($n, $p) at $(now())"
     end
 end
-
-#CSV.write("transitive_triangles_results.csv", results)
-#=
-if isfile("5_transitive_triangles.csv")
-    CSV.write("5_transitive_triangles.csv", df; append=true)
-else
-    CSV.write("5_transitive_triangles.csv", df)  # write with header
-end
-=#

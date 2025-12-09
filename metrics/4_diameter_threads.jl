@@ -1,4 +1,3 @@
-# diameter_threads.jl
 using Graphs, Graphs.SimpleGraphs
 using SparseArrays, LinearAlgebra
 using SimpleTraits, Statistics
@@ -7,8 +6,7 @@ using Random;Random.seed!(42)
 using Dates
 using CSV, DataFrames
 
-# Check
-Threads.nthreads()
+Threads.nthreads() # Check before running
 
 function ber_directed_divisor_graph(n::Int, p::Float64; rng::AbstractRNG)
     g = DiGraph(n)
@@ -39,7 +37,7 @@ function diameter_exact(g::DiGraph)::Int
     for u in vs
         if !active[u]; continue; end
 
-        # forward BFS (eccentricity)
+        # Forward BFS
         fill!(visited, false)
         visited[u] = true
         queue[1]   = u
@@ -61,7 +59,7 @@ function diameter_exact(g::DiGraph)::Int
         end
         diam = max(diam, e)
 
-        # depth-limited backward BFS to prune
+        # Backward BFS to prune
         dmax = diam - e
         if dmax ≥ 0
             fill!(distbuf, -1)
@@ -93,12 +91,12 @@ function diameter_exact(g::DiGraph)::Int
     return diam
 end
 
-
+# PARAMETERS
 n           = 2^20
 ps          = 0.01:0.01:0.50
 n_replicate = 10
 
-results_file = "4_2to$(Int(log2(n)))_diameter_results_ALT.csv"
+results_file = "4_2to$(Int(log2(n)))_diameter_results.csv"
 if !isfile(results_file)
     CSV.write(results_file, DataFrame(n=Int[], p=Float64[], rep=Int[], diameter=Int[]))
 end
@@ -106,13 +104,12 @@ end
 
 @time begin
     for p in ps
-        # Threaded over replicates; accumulate locally, then write once.
         local_rows = Vector{NamedTuple{(:n,:p,:rep,:diameter),Tuple{Int,Float64,Int,Int}}}(undef, n_replicate)
 
         @threads for rep in 1:n_replicate
             g = ber_directed_divisibility_graph(n, p)
 
-            # largest SCC
+            # Largest SCC
             scc_list   = strongly_connected_components_tarjan(g)
             comp_sizes = length.(scc_list)
             verts      = scc_list[argmax(comp_sizes)]
@@ -122,7 +119,6 @@ end
             local_rows[rep] = (n, p, rep, d)
         end
 
-        # single write per p (thread-safe)
         CSV.write(results_file, DataFrame(local_rows); append=true)
         @info "Completed p = $p with $(n_replicate) reps @ $(now())"
     end

@@ -1,5 +1,4 @@
-# forward_edge_ratio.jl
-
+# Forward edge ratio computatoin doesn't take much time, plus this is not the main part of the research, so we do not optimize / multi-thread.
 using Graphs, Graphs.SimpleGraphs
 using SparseArrays, LinearAlgebra
 using SimpleTraits, Statistics
@@ -27,16 +26,18 @@ n_replicate = 10_000
 
 results = DataFrame(n=Int[],p=Float64[], replicate=Int[], forward_edge_ratio=Float64[])
 
-# 1.32 to 1.76 sec when n=2^15, ps=0.1,0.1,0.5, n_replicate=1
+# Takes 1.32 to 1.76 seconds when n=2^15, ps=0.1,0.1,0.5, n_replicate=1
 @time begin
     for p in ps
         for rep in 1:n_replicate
             g = ber_directed_divisor_graph(n, p)
-            # find largest SCC
+
+            # Largest SCC
             scc_list   = strongly_connected_components_tarjan(g)
             comp_sizes = length.(scc_list)
             verts      = scc_list[argmax(comp_sizes)]
             subg, _    = induced_subgraph(g, verts)
+
             # compute forward-edge ratio
             fe = count(e -> src(e) < dst(e), edges(subg))
             tot = ne(subg)
@@ -51,5 +52,5 @@ end
 if isfile("2_2to$(Int(log2(n)))_forward_edge_ratio.csv")
     CSV.write("2_2to$(Int(log2(n)))_forward_edge_ratio.csv", results; append=true)
 else
-    CSV.write("2_2to$(Int(log2(n)))_forward_edge_ratio.csv", results)  # write with header
+    CSV.write("2_2to$(Int(log2(n)))_forward_edge_ratio.csv", results)
 end

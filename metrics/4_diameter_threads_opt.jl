@@ -1,3 +1,4 @@
+# Parts of the optimization was done using Gemini 2.5
 using Graphs, Graphs.SimpleGraphs
 using SparseArrays, LinearAlgebra
 using SimpleTraits, Statistics
@@ -6,10 +7,8 @@ using Random; Random.seed!(42)
 using Dates
 using CSV, DataFrames
 
-# Check
-Threads.nthreads()
+Threads.nthreads() # Check before running
 
-# Divisibility graph with Bernoulli orientation (global RNG)
 function ber_directed_divisor_graph(n::Int, p::Float64)
     g = DiGraph(n)
     @inbounds for i in 1:n, j in 2*i:i:n
@@ -22,7 +21,7 @@ function ber_directed_divisor_graph(n::Int, p::Float64)
     return g
 end
 
-# Build CSR for induced subgraph on verts (local vertices are 1..n2)
+# Build CSR for induced subgraph
 # Returns (rowptr_out::Vector{Int}, col_out::Vector{Int}, rowptr_in::Vector{Int}, col_in::Vector{Int})
 function build_csr_induced(g::DiGraph, verts::Vector{Int})
     n2 = length(verts)
@@ -32,7 +31,7 @@ function build_csr_induced(g::DiGraph, verts::Vector{Int})
         gl2lc[v] = i
     end
 
-    # Pass 1: count out-degrees within the set
+    # count out-degrees within the set
     outdeg = zeros(Int, n2)
     @inbounds for (i, v) in enumerate(verts)
         cnt = 0
@@ -52,7 +51,7 @@ function build_csr_induced(g::DiGraph, verts::Vector{Int})
     end
     col_out = Vector{Int}(undef, rowptr_out[end] - 1)
 
-    # Pass 2: fill col_out and accumulate indegrees
+    # fill col_out and accumulate indegrees
     pos_out = copy(rowptr_out)
     indeg   = zeros(Int, n2)
     @inbounds for (i, v) in enumerate(verts)
@@ -91,7 +90,7 @@ function build_csr_induced(g::DiGraph, verts::Vector{Int})
     return rowptr_out, col_out, rowptr_in, col_in
 end
 
-# Helpers to get degree from CSR
+# Helpers to get degree
 @inline function outdeg_csr(rowptr::Vector{Int}, v::Int)
     return rowptr[v+1] - rowptr[v]
 end
@@ -99,15 +98,15 @@ end
     return rowptr[v+1] - rowptr[v]
 end
 
-# Exact diameter on CSR adjacency with epoch trick (no repeated clears)
+# Exact diameter
 function diameter_exact_csr(rpo::Vector{Int}, co::Vector{Int},
                             rpi::Vector{Int}, ci::Vector{Int})::Int
     n = length(rpo) - 1
-    active    = fill(true, n)              # Vector{Bool}
+    active    = fill(true, n)
     remaining = n
 
-    visited_epoch = zeros(Int, n)          # valid when == token
-    dist_epoch    = zeros(Int, n)          # valid when == dtok
+    visited_epoch = zeros(Int, n) # valid when == token
+    dist_epoch    = zeros(Int, n) # valid when == dtok
     dist          = fill(-1, n)
     queue         = Vector{Int}(undef, n)
 
@@ -126,7 +125,7 @@ function diameter_exact_csr(rpo::Vector{Int}, co::Vector{Int},
     @inbounds for u in vs
         if !active[u]; continue; end
 
-        # Forward BFS for ecc(u)
+        # Forward BFS
         token += 1
         visited_epoch[u] = token
         queue[1] = u
@@ -149,7 +148,7 @@ function diameter_exact_csr(rpo::Vector{Int}, co::Vector{Int},
         end
         if e > diam; diam = e; end
 
-        # Depth-limited backward BFS to prune
+        # Backward BFS to prune
         dmax = diam - e
         if dmax >= 0
             dtok += 1
@@ -183,11 +182,12 @@ function diameter_exact_csr(rpo::Vector{Int}, co::Vector{Int},
     return diam
 end
 
-n           = 2^20
-ps          = 0.5:-0.01:0.45
+# PARAMETERS
+n           = 2^10
+ps          = 0.01:0.01:0.5
 n_replicate = 10
 
-results_file = "4_2to$(Int(log2(n)))_diameter_results_ALT_ALT.csv"
+results_file = "4_2to$(Int(log2(n)))_diameter_results.csv"
 if !isfile(results_file)
     CSV.write(results_file, DataFrame(n=Int[], p=Float64[], rep=Int[], diameter=Int[]))
 end
@@ -199,12 +199,12 @@ end
         @threads for rep in 1:n_replicate
             g = ber_directed_divisor_graph(n, p)
 
-            # L-SCC
+            # Largest SCC
             scc_list   = strongly_connected_components_tarjan(g)
             comp_sizes = length.(scc_list)
             verts      = scc_list[argmax(comp_sizes)]
 
-            # CSR adjacencies (no push!, contiguous)
+            # CSR adjacencies : no push!, contiguous
             rpo, co, rpi, ci = build_csr_induced(g, verts)
 
             # exact diameter
@@ -217,4 +217,3 @@ end
         @info "Completed p = $p with $(n_replicate) reps @ $(now())"
     end
 end
- 

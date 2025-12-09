@@ -8,7 +8,7 @@ using Random; Random.seed!(42)
 using Dates
 using CSV, DataFrames
 
-Threads.nthreads()
+Threads.nthreads() # Check before running
 
 function ber_directed_divisor_graph(n::Int64, p::Float64)
     g = DiGraph(n)
