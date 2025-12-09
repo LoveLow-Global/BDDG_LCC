@@ -2,27 +2,25 @@ using CSV
 using DataFrames
 using Statistics
 using Plots
+using Compose
 
 files = [
     "0_2to5_size_lcc.csv",
     "0_2to10_size_lcc.csv",
-    #"0_2to15_size_lcc.csv",
+    "0_2to15_size_lcc.csv",
     "0_2to20_size_lcc.csv"
 ]
 
-# read each into a DataFrame and vcat them together
 df = vcat([ CSV.read(f, DataFrame) for f in files ]...)
 
-# 1) Read & prepare
 df.r = df.size_lcc ./ df.n
 agg = combine(groupby(df, [:n, :p]), :r => mean => :mean_ratio)
 sort!(agg, [:n, :p])
 
-# 2) Build a palette & ordered list of n's
 ns     = sort(unique(agg.n))
 colors = palette(:tab10, length(ns))
 
-# 3) Plot loop with pre-computed colors
+# Plot
 plt = plot()
 for (i, nval) in enumerate(ns)
     col = colors[i]
@@ -36,24 +34,13 @@ for (i, nval) in enumerate(ns)
           marker     = :circle,
           markersize = 4,
           lw         = 2)
-    # star at the max
-    i_max = argmax(sub.mean_ratio)
-    scatter!(plt,
-             [sub.p[i_max]],
-             [sub.mean_ratio[i_max]];
-             marker     = :star5,
-             markersize = 8,
-             color      = col,
-             label      = "")
+
 end
 
-# 4) Final tweaks
+plot!(plt, ylim=(0, 1.0))
 xlabel!(plt, "p")
 ylabel!(plt, "Largest SCC size / n")
-title!(plt, "Largest SCC")
-
+title!(plt, "Largest SCC per n")
 display(plt)
 
-# savefig(plt, "5_Transative_triangles_plot.png")
-using Compose
 savefig(plt, "0_size_largest_SCC_plot.pdf")

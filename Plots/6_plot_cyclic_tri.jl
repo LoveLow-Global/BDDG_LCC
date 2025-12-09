@@ -10,15 +10,13 @@ files = [
     "6_2to20_cyclic_triangles.csv"
 ]
 
-# read each into a DataFrame and vcat them together
 df = vcat([ CSV.read(f, DataFrame) for f in files ]...)
-# 1) Read & prepare
-#df = CSV.read("6_cyclic_triangles.csv", DataFrame)
+
 df.r = df.ct ./ df.n
 agg = combine(groupby(df, [:n, :p]), :r => mean => :mean_ratio)
 sort!(agg, [:n, :p])
 
-# 2) Build a palette & ordered list of n's
+
 ns     = sort(unique(agg.n))
 colors = palette(:tab10, length(ns))
 
@@ -36,27 +34,14 @@ for (i, nval) in enumerate(ns)
           marker     = :circle,
           markersize = 4,
           lw         = 2)
-    # star at the max
-    #=
-    i_max = argmax(sub.mean_ratio)
-    scatter!(plt,
-             [sub.p[i_max]],
-             [sub.mean_ratio[i_max]];
-             marker     = :star5,
-             markersize = 8,
-             color      = col,
-             label      = "")
-             =#
+
+        # Star at Max Not Required of Cyclic Triangles, it'll be 0.5 anyway.
 end
 
-# 4) Final tweaks
 xlabel!(plt, "p")
 ylabel!(plt, "Cyclic Triangles / n")
 title!(plt, "Cyclic Triangles of the Largest SCC")
-
 display(plt)
 
-# savefig(plt, "6_cyclic_triangles_plot.png")
-using Pkg;Pkg.add("Compose")
 using Compose
 savefig(plt, "6_cyclic_triangles_plot.pdf")

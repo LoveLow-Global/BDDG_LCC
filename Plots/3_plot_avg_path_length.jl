@@ -3,7 +3,7 @@ using DataFrames
 using Statistics
 using Plots
 using Colors
-
+using Compose
 
 files = [
     "3_2to5_avg_path_length.csv",
@@ -12,20 +12,15 @@ files = [
     "3_2to20_avg_path_length.csv"
 ]
 
-# read each into a DataFrame and vcat them together
 df = vcat([ CSV.read(f, DataFrame) for f in files ]...)
-#df = CSV.read("3_avg_path_length.csv", DataFrame)
 
 agg = combine(groupby(df, [:n, :p]), :apl => mean => :mean_ratio)
 
 sort!(agg, [:n, :p])
 
-# 2) Build a palette & ordered list of n's
-ns     = sort(unique(agg.n))
-#colors = [ HSV(i/length(ns), 0.7, 0.9) for i in 1:length(ns) ]   # or palette(:tab10, length(ns)), etc.
+ns     = sort(unique(agg.n)).
 colors = palette(:tab10, length(ns))
 
-# 3) Plot loop with pre-computed colors
 plt = plot()
 for (i, nval) in enumerate(ns)
     col = colors[i]
@@ -40,6 +35,7 @@ for (i, nval) in enumerate(ns)
           markersize = 4,
           lw         = 2)
     # star at the max
+    # Star at Max Not Required for Average Path Length, unless we are investigating in really small p.
     #=
     i_max = argmax(sub.mean_ratio)
     scatter!(plt,
@@ -49,16 +45,12 @@ for (i, nval) in enumerate(ns)
              markersize = 8,
              color      = col,
              label      = "")
-             =#
+    =#
 end
 
-# 4) Final tweaks
 xlabel!(plt, "p")
 ylabel!(plt, "Avg Path Length")
 title!(plt, "Avg Path length of the Largest SCC")
-
 display(plt)
 
-# savefig(plt, "3_avg_path_length_plot.png")
-using Compose
 savefig(plt, "3_avg_path_length_plot.pdf")

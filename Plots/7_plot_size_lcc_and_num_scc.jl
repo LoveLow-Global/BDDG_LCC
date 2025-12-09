@@ -2,19 +2,19 @@ using CSV
 using DataFrames
 using Statistics
 using Plots
+using Colors
 using Compose
 
 files = [
-    "5_2to5_transitive_triangles.csv",
-    "5_2to10_transitive_triangles.csv",
-    "5_2to15_transitive_triangles.csv",
-    "5_2to20_transitive_triangles.csv"
+    "7_2to5_size_lcc_and_num_scc.csv",
+    "7_2to10_size_lcc_and_num_scc.csv",
+    "7_2to15_size_lcc_and_num_scc.csv",
+    "7_2to20_size_lcc_and_num_scc.csv"
 ]
 
 df = vcat([ CSV.read(f, DataFrame) for f in files ]...)
 
-df.r = df.tt ./ df.n
-agg = combine(groupby(df, [:n, :p]), :r => mean => :mean_ratio)
+agg = combine(groupby(df, [:n, :p]), :size_plus_num_rate => mean => :mean_ratio)
 sort!(agg, [:n, :p])
 
 ns     = sort(unique(agg.n))
@@ -34,8 +34,8 @@ for (i, nval) in enumerate(ns)
           marker     = :circle,
           markersize = 4,
           lw         = 2)
-    # star at the max
-    i_max = argmax(sub.mean_ratio)
+    # star at the Min (NOT Max)
+    i_max = argmin(sub.mean_ratio)
     scatter!(plt,
              [sub.p[i_max]],
              [sub.mean_ratio[i_max]];
@@ -46,8 +46,8 @@ for (i, nval) in enumerate(ns)
 end
 
 xlabel!(plt, "p")
-ylabel!(plt, "Transitive Triangles / n")
-title!(plt, "Transitive Triangles of the Largest SCC")
+ylabel!(plt, "(Size of Largest SCC + Number of SCC -1)/n")
+title!(plt, "Size of Largest SCC + Number of SCC -1")
 display(plt)
 
-savefig(plt, "5_Transative_triangles_plot.pdf")
+savefig(plt, "7_size_lcc_and_num_scc_plot.pdf")

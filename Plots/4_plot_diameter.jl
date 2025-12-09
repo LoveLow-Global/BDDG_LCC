@@ -3,29 +3,23 @@ using DataFrames
 using Statistics
 using Plots
 using Colors
+using Compose
 
-# Read & prepare
 files = [
     "4_2to5_diameter_results.csv",
     "4_2to10_diameter_results.csv",
     "4_2to15_diameter_results.csv",
     "4_2to20_diameter_results.csv"
 ]
-
-# read each into a DataFrame and vcat them together
 df = vcat([ CSV.read(f, DataFrame) for f in files ]...)
-#df = CSV.read("4_diameter_results.csv", DataFrame)
 
 agg = combine(groupby(df, [:n, :p]), :diameter => mean => :mean_ratio)
-
 sort!(agg, [:n, :p])
 
-# Build a palette & ordered list of n's
 ns     = sort(unique(agg.n))
-#colors = [ HSV(i/length(ns), 0.7, 0.9) for i in 1:length(ns) ]   # or palette(:tab10, length(ns)), etc.
 colors = palette(:tab10, length(ns))
 
-# 3) Plot loop with pre-computed colors
+# Plot
 plt = plot()
 for (i, nval) in enumerate(ns)
     col = colors[i]
@@ -50,12 +44,9 @@ for (i, nval) in enumerate(ns)
              label      = "")
 end
 
-# 4) Final tweaks
 xlabel!(plt, "p")
 ylabel!(plt, "Diameter")
 title!(plt, "Diameter of the Largest SCC")
-
 display(plt)
 
-using Compose
 savefig(plt, "4_diameter_plot.pdf")
