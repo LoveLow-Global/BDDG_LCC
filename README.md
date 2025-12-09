@@ -3,8 +3,12 @@ Open repository on the source code for simulations used in Bernoulli-Directed Di
 
 # Contact
 
-For any questions, or if you want to see the ongoing research paper, feel free to contact me.
+For any questions, feel free to contact me.
 
-There is also the private repository for this research, which is updated more often. If you are interested about this, also contact me.
+My contacts are: awesomepeoplefund@gmail.com or Jihyung.Kim.UG@dartmouth.edu
 
-My contacts are: awesomepeoplefund@gmail.com / Jihyung.Kim.UG@dartmouth.edu
+# Note
+
+I am manually uploading the files instead of using git push, as I have another private repository linked to this project.
+
+This research supported by the [William H. Neukom 1964 Institute for Computational Science](https://neukom.dartmouth.edu/).
