@@ -1,5 +1,5 @@
 # BDDG_LCC
-Open repository on the source code for simulations used in Bernoulli-Directed Divisor Graphs and its Largest Strongly Connected Component research.
+Open repository on the source code for simulations used in Randomly Oriented Divisor Graphs and its Largest Strongly Connected Component research.
 
 # Contact
 
