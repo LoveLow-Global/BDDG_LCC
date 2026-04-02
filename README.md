@@ -13,6 +13,6 @@ The optimized diameter calculation methods used in this research is now availabl
 
 This research supported by the [William H. Neukom 1964 Institute for Computational Science](https://neukom.dartmouth.edu/).
 
-As of Feb 2026, the codes will not be updated until the research paper is fully ready. Expected finish of the paper is late March 2026.
+As of Feb 2026, the codes will not be updated until the research paper is fully ready. Expected finish of the paper is April 2026.
 
-During March, the finalized, clean codes will be uploaded.
+During April, the finalized, clean codes will be uploaded.
