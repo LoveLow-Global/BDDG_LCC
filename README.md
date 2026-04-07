@@ -1,18 +1,9 @@
 # BDDG_LCC
-Open repository on the source code for simulations used in Randomly Oriented Divisor Graphs and its Largest Strongly Connected Component research.
+
+The old repository for code that were used [On the Largest Strongly Connected Component of Randomly Oriented Divisor Graphs research](LINK TO THE PAPER TO BE ADDED). This repository is no longer maintained.
+
+The new repository which has the up-to date codes can be found in [this link](https://github.com/LoveLow-Global/randomly-oriented-divisor-graphs).
 
 # Contact
 
-For any questions, feel free to contact me.
-
-My contacts are: awesomepeoplefund@gmail.com or Jihyung.Kim.UG@dartmouth.edu
-
-# Note
-
-The optimized diameter calculation methods used in this research is now available by [Graphs.jl](https://github.com/JuliaGraphs/Graphs.jl)'s `diameter()` function directly, from V1.13.2.
-
-This research supported by the [William H. Neukom 1964 Institute for Computational Science](https://neukom.dartmouth.edu/).
-
-As of Feb 2026, the codes will not be updated until the research paper is fully ready. Expected finish of the paper is April 2026.
-
-During April, the finalized, clean codes will be uploaded.
+For any questions, feel free to contact me at [lovelow@yonsei.ac.kr](mailto:lovelow@yonsei.ac.kr).
